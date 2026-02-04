@@ -28,7 +28,7 @@ def create_card(
             "title": title,
             "description": description or "",
             "listPublicId": list_id,
-            "position": position,
+            "position": position or "end",
             "labelPublicIds": [],
             "memberPublicIds": [],
         }
