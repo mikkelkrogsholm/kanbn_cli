@@ -3,7 +3,7 @@
 import mimetypes
 import os
 import typer
-import requests
+import httpx
 
 from kanbn_cli.api.client import KanbnClient
 from kanbn_cli.config import load_config
@@ -52,9 +52,10 @@ def upload_attachment(
         # 2. Upload file
         print_info("Uploading file...")
         with open(file_path, "rb") as f:
-            response = requests.put(
+            content = f.read()
+            response = httpx.put(
                 upload_url, 
-                data=f, 
+                content=content, 
                 headers={"Content-Type": mime_type}
             )
             response.raise_for_status()
@@ -71,7 +72,7 @@ def upload_attachment(
         
         print_success(f"Attachment uploaded successfully: {filename}")
 
-    except requests.RequestException as e:
+    except httpx.RequestError as e:
         print_error(f"Upload failed: {str(e)}")
         raise typer.Exit(1)
     except KanbnError as e:

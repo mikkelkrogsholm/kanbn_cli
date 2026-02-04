@@ -48,39 +48,39 @@ class KanbnClient:
             "Accept": "application/json",
         }
 
-    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
+    def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None) -> Any:
         """Make a GET request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        with httpx.Client() as client:
+        with httpx.Client(timeout=timeout) as client:
             response = client.get(url, headers=self._build_headers(), params=params)
             return self._handle_response(response)
 
     def post(
-        self, endpoint: str, data: Optional[Dict[str, Any]] = None, json: Optional[Dict[str, Any]] = None
+        self, endpoint: str, data: Optional[Dict[str, Any]] = None, json: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None
     ) -> Any:
         """Make a POST request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        with httpx.Client() as client:
+        with httpx.Client(timeout=timeout) as client:
             response = client.post(url, headers=self._build_headers(), data=data, json=json)
             return self._handle_response(response)
 
-    def put(self, endpoint: str, json: Optional[Dict[str, Any]] = None) -> Any:
+    def put(self, endpoint: str, json: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None) -> Any:
         """Make a PUT request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        with httpx.Client() as client:
+        with httpx.Client(timeout=timeout) as client:
             response = client.put(url, headers=self._build_headers(), json=json)
             return self._handle_response(response)
 
-    def patch(self, endpoint: str, json: Optional[Dict[str, Any]] = None) -> Any:
+    def patch(self, endpoint: str, json: Optional[Dict[str, Any]] = None, timeout: Optional[float] = None) -> Any:
         """Make a PATCH request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        with httpx.Client() as client:
+        with httpx.Client(timeout=timeout) as client:
             response = client.patch(url, headers=self._build_headers(), json=json)
             return self._handle_response(response)
 
-    def delete(self, endpoint: str) -> Any:
+    def delete(self, endpoint: str, timeout: Optional[float] = None) -> Any:
         """Make a DELETE request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
-        with httpx.Client() as client:
+        with httpx.Client(timeout=timeout) as client:
             response = client.delete(url, headers=self._build_headers())
             return self._handle_response(response)

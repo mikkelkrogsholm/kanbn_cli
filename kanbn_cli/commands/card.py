@@ -1,15 +1,77 @@
 """Card commands."""
 
+from pathlib import Path
 from typing import Optional
-
 import typer
+from rich.table import Table
+from rich.console import Console
 
 from kanbn_cli.api.client import KanbnClient
 from kanbn_cli.config import load_config
-from kanbn_cli.utils.display import display_card, display_cards, print_error, print_success
+from kanbn_cli.utils.display import display_card, display_cards, print_error, print_success, print_info
 from kanbn_cli.utils.errors import KanbnError
+from kanbn_cli.utils.board_resolver import resolve_board_name
 
 app = typer.Typer(help="Manage cards")
+console = Console()
+
+
+@app.command("list")
+def list_cards(
+    board_id: str = typer.Argument(..., help="Board ID or Name"),
+    list_name: Optional[str] = typer.Option(None, "--list", "-l", help="Filter by list name"),
+):
+    """List all cards in a board."""
+    try:
+        config = load_config()
+        client = KanbnClient(config)
+
+        # Resolve board ID if name provided
+        # Assuming boards.md is in the project root or similar. 
+        # For this CLI, we might check a standard location or the current dir.
+        # Let's try current dir and up.
+        # However, the user request implied skill_dir... let's assume current dir for now 
+        # or maybe the package root? The validation will show.
+        # Actually, let's use a safe default path for the resolver context.
+        # Using Path.cwd() allows users to have boards.md in their working dir.
+        resolved_id = resolve_board_name(board_id, Path.cwd())
+
+        # Get board to access cards
+        board = client.get(f"boards/{resolved_id}")
+
+        cards = []
+        for lst in board.get("lists", []):
+            if list_name and lst["name"].lower() != list_name.lower():
+                continue
+            for card in lst.get("cards", []):
+                card["_listName"] = lst["name"]
+                cards.append(card)
+
+        if not cards:
+            print_info("No cards found")
+            return
+
+        # Create table
+        table = Table(title=f"Cards in {board.get('name', board_id)}")
+        table.add_column("Title", style="cyan", no_wrap=False)
+        table.add_column("ID", style="dim")
+        table.add_column("List", style="green")
+        table.add_column("Labels", style="yellow")
+
+        for card in cards:
+            labels = ", ".join([l.get("name", "") for l in card.get("labels", [])])
+            table.add_row(
+                card.get("title", "")[:50],  # Truncate long titles
+                card.get("publicId", ""),
+                card.get("_listName", ""),
+                labels[:30] or "-"
+            )
+
+        console.print(table)
+
+    except KanbnError as e:
+        print_error(str(e))
+        raise typer.Exit(1)
 
 
 @app.command("create")

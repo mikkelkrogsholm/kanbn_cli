@@ -149,8 +149,19 @@ def search_workspace(
         config = load_config()
         client = KanbnClient(config)
 
-        results = client.get(f"workspaces/{workspace_id}/search", params={"q": query})
+        results = client.get(f"workspaces/{workspace_id}/search", params={"query": query})
         
+        if isinstance(results, list):
+            if not results:
+                from kanbn_cli.utils.display import print_info
+                print_info(f"No results found for '{query}'")
+                return
+            # If it returns a list of mixed items, we might need a different display logic
+            # For now, let's dump it or try to categorize if possible
+            # But the error showed specifically empty list []
+            console.print(results)
+            return
+
         if results.get("boards"):
             from kanbn_cli.utils.display import display_boards
             display_boards(results["boards"])
