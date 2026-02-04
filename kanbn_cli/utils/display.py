@@ -150,9 +150,106 @@ def display_card(card: Dict[str, Any]) -> None:
     if checklists:
         content += "\n[bold]Checklists:[/bold]\n"
         for checklist in checklists:
-            content += f"  • {checklist.get('title')}\n"
+            name = checklist.get('name') or checklist.get('title') or 'Untitled'
+            clid = checklist.get('publicId') or checklist.get('public_id') or checklist.get('id')
+            content += f"  • {name} (ID: {clid})\n"
             for item in checklist.get("items", []):
                 status = "✓" if item.get("completed") else "○"
-                content += f"    {status} {item.get('title')}\n"
+                iid = item.get('publicId') or item.get('public_id') or item.get('id')
+                content += f"    {status} {item.get('title')} (ID: {iid})\n"
     
     console.print(Panel.fit(content, title="Card Details", border_style="green"))
+
+
+def display_activities(activities: List[Dict[str, Any]]) -> None:
+    """Display card activities."""
+    if not activities or not activities.get("activities"):
+        print_info("No activities found")
+        return
+
+    table = Table(title="Card Activity")
+    table.add_column("Date", style="cyan")
+    table.add_column("User", style="green")
+    table.add_column("Action", style="yellow")
+    table.add_column("Details")
+    
+    for activity in activities.get("activities", []):
+        table.add_row(
+            activity.get("createdAt", ""),
+            activity.get("user", {}).get("name", ""),
+            activity.get("action", ""),
+            activity.get("details", "") or ""
+        )
+    console.print(table)
+
+
+def display_user(user: Dict[str, Any]) -> None:
+    """Display user profile."""
+    console.print(Panel.fit(
+        f"[bold]{user.get('name')}[/bold]\n"
+        f"Email: {user.get('email')}\n"
+        f"ID: {user.get('publicId')}",
+        title="User Profile",
+        border_style="blue"
+    ))
+
+
+def display_activities(activities: List[Dict[str, Any]]) -> None:
+    """Display card activities."""
+    if not activities or not activities.get("activities"):
+        print_info("No activities found")
+        return
+
+    table = Table(title="Card Activity")
+    table.add_column("Date", style="cyan")
+    table.add_column("User", style="green")
+    table.add_column("Action", style="yellow")
+    table.add_column("Details")
+    
+    for activity in activities.get("activities", []):
+        table.add_row(
+            activity.get("createdAt", ""),
+            activity.get("user", {}).get("name", ""),
+            activity.get("action", ""),
+            activity.get("details", "") or ""
+        )
+    console.print(table)
+
+
+def display_integrations(providers: List[Dict[str, Any]]) -> None:
+    """Display integration providers."""
+    if not providers:
+        print_info("No integrations found")
+        return
+
+    table = Table(title="Integrations")
+    table.add_column("Provider", style="cyan")
+    table.add_column("Connected", style="green")
+    
+    for provider in providers:
+        connected = "✓" if provider.get("connected") else "○"
+        table.add_row(
+            provider.get("name", ""),
+            connected
+        )
+    console.print(table)
+
+
+def display_trello_boards(boards: List[Dict[str, Any]]) -> None:
+    """Display Trello boards."""
+    if not boards:
+        print_info("No Trello boards found")
+        return
+
+    table = Table(title="Trello Boards")
+    table.add_column("ID", style="cyan")
+    table.add_column("Name", style="green")
+    table.add_column("URL")
+    
+    for board in boards:
+        table.add_row(
+            board.get("id", ""),
+            board.get("name", ""),
+            board.get("url", "")
+        )
+    console.print(table)

@@ -162,3 +162,49 @@ def search_workspace(
     except KanbnError as e:
         print_error(str(e))
         raise typer.Exit(1)
+
+
+@app.command("invite")
+def invite_member(
+    workspace_id: str = typer.Argument(..., help="Workspace ID"),
+    email: str = typer.Argument(..., help="User email"),
+):
+    """Invite member by email."""
+    try:
+        config = load_config()
+        client = KanbnClient(config)
+
+        data = {"email": email}
+        client.post(f"workspaces/{workspace_id}/members", json=data)
+        print_success(f"Invited {email} to workspace")
+
+    except KanbnError as e:
+        print_error(str(e))
+        raise typer.Exit(1)
+
+
+@app.command("remove-member")
+def remove_member(
+    workspace_id: str = typer.Argument(..., help="Workspace ID"),
+    user_id: str = typer.Argument(..., help="User ID"),
+    confirm: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation"),
+):
+    """Remove member from workspace."""
+    try:
+        if not confirm:
+            confirm = typer.confirm(f"Are you sure you want to remove user {user_id}?")
+            if not confirm:
+                raise typer.Abort()
+
+        config = load_config()
+        client = KanbnClient(config)
+
+        client.delete(f"workspaces/{workspace_id}/members/{user_id}")
+        print_success(f"Removed user {user_id} from workspace")
+
+    except typer.Abort:
+        print_error("Cancelled")
+        raise typer.Exit(1)
+    except KanbnError as e:
+        print_error(str(e))
+        raise typer.Exit(1)
