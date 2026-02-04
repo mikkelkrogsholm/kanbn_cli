@@ -34,7 +34,7 @@ def display_workspace(workspace: Dict[str, Any]) -> None:
     """Display workspace details."""
     console.print(Panel.fit(
         f"[bold]{workspace.get('name')}[/bold]\n"
-        f"ID: {workspace.get('public_id') or workspace.get('id')}\n"
+        f"ID: {workspace.get('publicId') or workspace.get('public_id') or workspace.get('id')}\n"
         f"Slug: {workspace.get('slug', 'N/A')}\n"
         f"Description: {workspace.get('description', 'N/A')}",
         title="Workspace",
@@ -55,11 +55,13 @@ def display_workspaces(workspaces: List[Dict[str, Any]]) -> None:
     table.add_column("Description")
 
     for ws in workspaces:
+        # Handle API response structure that may wrap workspace in {role, workspace}
+        workspace_data = ws.get("workspace", ws)
         table.add_row(
-            ws.get("public_id") or ws.get("id", ""),
-            ws.get("name", ""),
-            ws.get("slug", ""),
-            ws.get("description", "")[:50] if ws.get("description") else ""
+            workspace_data.get("publicId") or workspace_data.get("public_id") or workspace_data.get("id", ""),
+            workspace_data.get("name", ""),
+            workspace_data.get("slug", ""),
+            workspace_data.get("description", "")[:50] if workspace_data.get("description") else ""
         )
 
     console.print(table)
@@ -79,7 +81,7 @@ def display_boards(boards: List[Dict[str, Any]]) -> None:
 
     for board in boards:
         table.add_row(
-            board.get("public_id") or board.get("id", ""),
+            board.get("publicId") or board.get("public_id") or board.get("id", ""),
             board.get("name", ""),
             board.get("slug", ""),
             board.get("description", "")[:50] if board.get("description") else ""
@@ -101,7 +103,7 @@ def display_lists(lists: List[Dict[str, Any]]) -> None:
 
     for lst in lists:
         table.add_row(
-            lst.get("public_id") or lst.get("id", ""),
+            lst.get("publicId") or lst.get("public_id") or lst.get("id", ""),
             lst.get("name", ""),
             str(lst.get("position", ""))
         )
@@ -124,7 +126,7 @@ def display_cards(cards: List[Dict[str, Any]]) -> None:
     for card in cards:
         labels = ", ".join([l.get("name", "") for l in card.get("labels", [])])
         table.add_row(
-            card.get("public_id") or card.get("id", ""),
+            card.get("publicId") or card.get("public_id") or card.get("id", ""),
             card.get("title", ""),
             card.get("description", "")[:40] if card.get("description") else "",
             labels
@@ -138,10 +140,10 @@ def display_card(card: Dict[str, Any]) -> None:
     labels = ", ".join([l.get("name", "") for l in card.get("labels", [])])
     
     content = f"[bold]{card.get('title')}[/bold]\n\n"
-    content += f"ID: {card.get('public_id') or card.get('id')}\n"
+    content += f"ID: {card.get('publicId') or card.get('public_id') or card.get('id')}\n"
     content += f"Description: {card.get('description', 'N/A')}\n"
     content += f"Labels: {labels or 'None'}\n"
-    content += f"Due Date: {card.get('due_date', 'N/A')}\n"
+    content += f"Due Date: {card.get('dueDate') or card.get('due_date', 'N/A')}\n"
     
     # Display checklists
     checklists = card.get("checklists", [])

@@ -70,7 +70,7 @@ def update_card(
         if description:
             data["description"] = description
         if list_id:
-            data["list_id"] = list_id
+            data["listPublicId"] = list_id # Changed to listPublicId
 
         if not data:
             print_error("No update fields provided")
@@ -120,7 +120,7 @@ def add_comment(
         config = load_config()
         client = KanbnClient(config)
 
-        data = {"content": text}
+        data = {"comment": text}
         comment = client.post(f"cards/{card_id}/comments", json=data)
         print_success("Comment added")
 

@@ -14,17 +14,6 @@ class KanbnClient:
         """Initialize the client with configuration."""
         self.config = config
         self.base_url = config.api_url.rstrip("/")
-        self.headers = self._build_headers()
-
-    def _build_headers(self) -> Dict[str, str]:
-        """Build request headers."""
-        headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-        if self.config.api_token:
-            headers["Authorization"] = f"Bearer {self.config.api_token}"
-        return headers
 
     def _handle_response(self, response: httpx.Response) -> Any:
         """Handle API response and errors."""
@@ -48,11 +37,22 @@ class KanbnClient:
         except Exception:
             return response.text
 
+    def _build_headers(self) -> Dict[str, str]:
+        """Build request headers with API key."""
+        if not self.config.api_token:
+            raise AuthenticationError("Not authenticated. Run 'kanbn auth login' first.")
+        
+        return {
+            "x-api-key": self.config.api_token,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+
     def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Any:
         """Make a GET request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         with httpx.Client() as client:
-            response = client.get(url, headers=self.headers, params=params)
+            response = client.get(url, headers=self._build_headers(), params=params)
             return self._handle_response(response)
 
     def post(
@@ -61,26 +61,26 @@ class KanbnClient:
         """Make a POST request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         with httpx.Client() as client:
-            response = client.post(url, headers=self.headers, data=data, json=json)
+            response = client.post(url, headers=self._build_headers(), data=data, json=json)
             return self._handle_response(response)
 
     def put(self, endpoint: str, json: Optional[Dict[str, Any]] = None) -> Any:
         """Make a PUT request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         with httpx.Client() as client:
-            response = client.put(url, headers=self.headers, json=json)
+            response = client.put(url, headers=self._build_headers(), json=json)
             return self._handle_response(response)
 
     def patch(self, endpoint: str, json: Optional[Dict[str, Any]] = None) -> Any:
         """Make a PATCH request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         with httpx.Client() as client:
-            response = client.patch(url, headers=self.headers, json=json)
+            response = client.patch(url, headers=self._build_headers(), json=json)
             return self._handle_response(response)
 
     def delete(self, endpoint: str) -> Any:
         """Make a DELETE request."""
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
         with httpx.Client() as client:
-            response = client.delete(url, headers=self.headers)
+            response = client.delete(url, headers=self._build_headers())
             return self._handle_response(response)
