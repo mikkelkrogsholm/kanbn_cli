@@ -17,15 +17,21 @@ def create_card(
     list_id: str = typer.Argument(..., help="List ID"),
     title: str = typer.Argument(..., help="Card title"),
     description: Optional[str] = typer.Option(None, "--description", "-d", help="Description"),
+    position: Optional[int] = typer.Option(None, "--position", "-p", help="Position in the list"),
 ):
     """Create a new card."""
     try:
         config = load_config()
         client = KanbnClient(config)
 
-        data = {"title": title, "list_id": list_id}
-        if description:
-            data["description"] = description
+        data = {
+            "title": title,
+            "description": description or "",
+            "listPublicId": list_id,
+            "position": position,
+            "labelPublicIds": [],
+            "memberPublicIds": [],
+        }
 
         card = client.post("cards", json=data)
         print_success(f"Created card: {card.get('title')}")
