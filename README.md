@@ -175,7 +175,7 @@ kanbn card label CARD_ID LABEL_ID --remove
 The CLI stores configuration in `~/.kanbnrc` as JSON. You can also use environment variables:
 
 ```bash
-export KANBN_API_URL="https://kanban.mikkelkrogsholm.dk/api"
+export KANBN_API_URL="https://api.your-instance.com"
 export KANBN_API_TOKEN="your_token_here"
 export KANBN_DEFAULT_WORKSPACE="workspace_id"
 ```
@@ -183,7 +183,7 @@ export KANBN_DEFAULT_WORKSPACE="workspace_id"
 Or create a `.env` file in your project:
 
 ```env
-KANBN_API_URL=https://kanban.mikkelkrogsholm.dk/api
+KANBN_API_URL=https://api.your-instance.com
 KANBN_API_TOKEN=your_token_here
 ```
 
